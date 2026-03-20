@@ -172,32 +172,55 @@
   </div>
 
   <!-- ═══════════════════════════════════ SCANNING ═══════════════════════════════════ -->
-  <div class="screen" id="screen-scan-loading">
-    <div class="statusbar"><span>09:41</span><span>▮▮▮ WiFi ■■■</span></div>
-    <div class="header">
-      <div class="header-top">
-        <button class="back-btn" onclick="goTo('screen-home')">Indietro</button>
+  <div class="screen" id="screen-scan-loading" style="position:relative;overflow:hidden">
+  
+    <!-- FULLSCREEN CAMERA BACKGROUND -->
+    <video id="scan-video" autoplay playsinline muted
+      style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0">
+    </video>
+  
+    <!-- Dark overlay to keep UI readable -->
+    <div style="position:absolute;inset:0;background:linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.55) 0%,
+      rgba(0,0,0,0.15) 40%,
+      rgba(0,0,0,0.15) 60%,
+      rgba(0,0,0,0.65) 100%
+    );z-index:1;pointer-events:none"></div>
+  
+    <!-- ALL UI on top (z-index:2+) -->
+    <div style="position:relative;z-index:2;display:flex;flex-direction:column;height:100%">
+  
+      <div class="statusbar"><span>09:41</span><span>▮▮▮ WiFi ■■■</span></div>
+      <div class="header" style="background:transparent">
+        <div class="header-top">
+          <button class="back-btn" onclick="goTo('screen-home')">Indietro</button>
+        </div>
+        <div class="page-title">Scansione</div>
+        <div class="page-subtitle">Punta la fotocamera sul barcode</div>
       </div>
-      <div class="page-title">Scansione</div>
-      <div class="page-subtitle">Barcode rilevato automaticamente</div>
-    </div>
-
-    <div class="content" style="display:flex;flex-direction:column;align-items:center;padding-top:20px">
-      <div class="scan-anim">
-        <div class="scan-bg"></div>
-        <div class="scan-line"></div>
-        <div class="scan-corner tl"></div>
-        <div class="scan-corner tr"></div>
-        <div class="scan-corner bl"></div>
-        <div class="scan-corner br"></div>
+  
+      <!-- Scanning frame in the middle -->
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
+        <div class="scan-anim" style="background:transparent">
+          <div class="scan-line"></div>
+          <div class="scan-corner tl"></div>
+          <div class="scan-corner tr"></div>
+          <div class="scan-corner bl"></div>
+          <div class="scan-corner br"></div>
+        </div>
+        <p style="color:rgba(255,255,255,0.7);font-size:13px">Analisi in corso…</p>
       </div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:32px">Analisi in corso…</p>
-      <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--accent2);margin-bottom:8px">EAN-13 rilevato:</div>
-      <div style="font-family:'Space Mono',monospace;font-size:18px;letter-spacing:2px;color:var(--text)">8 00150 50055 9</div>
-      <button class="btn-primary" style="margin-top:40px;width:80%" onclick="goTo('screen-scan-result'); fetchAndFillProduct()">
-        Vedi risultato →
-      </button>
-      
+  
+      <!-- Bottom info panel -->
+      <div style="padding:20px 24px 24px;display:flex;flex-direction:column;align-items:center;gap:16px">
+        <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--accent2)">EAN-13 rilevato:</div>
+        <div style="font-family:'Space Mono',monospace;font-size:18px;letter-spacing:2px;color:#fff">8 00150 50055 9</div>
+        <button class="btn-primary" style="width:80%" onclick="goTo('screen-scan-result'), fetchAndFillProduct()">
+          Vedi risultato →
+        </button>
+      </div>
+  
     </div>
   </div>
 
@@ -206,7 +229,7 @@
     <div class="statusbar"><span>09:41</span><span>▮▮▮ WiFi ■■■</span></div>
     <div class="header">
       <div class="header-top">
-        <button class="back-btn" onclick="goTo('screen-scan-loading')">Indietro</button>
+        <button class="back-btn" onclick="goTo('screen-scan-loading'); " f>Indietro</button>
       </div>
       <div class="page-title">Prodotto trovato</div>
       <div class="page-subtitle">Dati da Open Food Facts</div>
