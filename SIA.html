@@ -6,6 +6,8 @@
 <title>S.I.A — Smart Inventory AI</title>
 <link href="style.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- ZXing library via UNPKG CDN -->
+<script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -23,7 +25,6 @@
     </div>
 
     <div class="content">
-      <!-- Stats -->
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-num" style="color:var(--text)">24</div>
@@ -39,13 +40,11 @@
         </div>
       </div>
 
-      <!-- Alert -->
       <div class="alert-banner" onclick="goTo('screen-home')">
         <div class="alert-icon">⚠️</div>
         <div class="alert-text"><strong>Uova Bio</strong> scade domani! Hai ancora 6 uova. Vuoi una ricetta?</div>
       </div>
 
-      <!-- Category chips -->
       <div class="chips">
         <div class="chip active">Tutti</div>
         <div class="chip">🍕 Cibo</div>
@@ -173,24 +172,24 @@
 
   <!-- ═══════════════════════════════════ SCANNING ═══════════════════════════════════ -->
   <div class="screen" id="screen-scan-loading" style="position:relative;overflow:hidden">
-  
-    <!-- FULLSCREEN CAMERA BACKGROUND -->
+
+    <!-- FULLSCREEN CAMERA — ZXing writes the stream directly into this video element -->
     <video id="scan-video" autoplay playsinline muted
       style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0">
     </video>
-  
-    <!-- Dark overlay to keep UI readable -->
+
+    <!-- Gradient overlay so the UI stays readable -->
     <div style="position:absolute;inset:0;background:linear-gradient(
       to bottom,
-      rgba(0,0,0,0.55) 0%,
-      rgba(0,0,0,0.15) 40%,
-      rgba(0,0,0,0.15) 60%,
-      rgba(0,0,0,0.65) 100%
+      rgba(0,0,0,0.60) 0%,
+      rgba(0,0,0,0.10) 35%,
+      rgba(0,0,0,0.10) 65%,
+      rgba(0,0,0,0.70) 100%
     );z-index:1;pointer-events:none"></div>
-  
-    <!-- ALL UI on top (z-index:2+) -->
+
+    <!-- All UI floats above the camera -->
     <div style="position:relative;z-index:2;display:flex;flex-direction:column;height:100%">
-  
+
       <div class="statusbar"><span>09:41</span><span>▮▮▮ WiFi ■■■</span></div>
       <div class="header" style="background:transparent">
         <div class="header-top">
@@ -199,28 +198,32 @@
         <div class="page-title">Scansione</div>
         <div class="page-subtitle">Punta la fotocamera sul barcode</div>
       </div>
-  
-      <!-- Scanning frame in the middle -->
+
+      <!-- Scan frame centered -->
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
-        <div class="scan-anim" style="background:transparent">
+        <div id="scan-frame" class="scan-anim" style="background:transparent;position:relative">
           <div class="scan-line"></div>
           <div class="scan-corner tl"></div>
           <div class="scan-corner tr"></div>
           <div class="scan-corner bl"></div>
           <div class="scan-corner br"></div>
         </div>
-        <p style="color:rgba(255,255,255,0.7);font-size:13px">Analisi in corso…</p>
+        <p id="scan-status" style="color:rgba(255,255,255,0.75);font-size:13px;margin:0;text-align:center;padding:0 32px">
+          Avvio fotocamera…
+        </p>
       </div>
-  
-      <!-- Bottom info panel -->
-      <div style="padding:20px 24px 24px;display:flex;flex-direction:column;align-items:center;gap:16px">
-        <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--accent2)">EAN-13 rilevato:</div>
-        <div style="font-family:'Space Mono',monospace;font-size:18px;letter-spacing:2px;color:#fff">8 00150 50055 9</div>
-        <button class="btn-primary" style="width:80%" onclick="goTo('screen-scan-result')">
+
+      <!-- Bottom EAN readout + button -->
+      <div style="padding:20px 24px 32px;display:flex;flex-direction:column;align-items:center;gap:12px">
+        <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent2);letter-spacing:1px;text-transform:uppercase">EAN rilevato</div>
+        <div id="ean-display" style="font-family:'Space Mono',monospace;font-size:20px;letter-spacing:3px;color:#fff">
+          — — —
+        </div>
+        <button class="btn-primary" style="width:80%;margin-top:4px" onclick="goTo('screen-scan-result')">
           Vedi risultato →
         </button>
       </div>
-  
+
     </div>
   </div>
 
@@ -241,7 +244,7 @@
         <div class="scan-result-info">
           <div class="scan-result-name">Pasta Spaghetti n.5</div>
           <div class="scan-result-brand">Barilla · 500g</div>
-          <div class="scan-result-ean">EAN: 8001505005592</div>
+          <div class="scan-result-ean" id="result-ean-display">EAN: —</div>
         </div>
       </div>
 
@@ -453,7 +456,7 @@
           </div>
         </div>
         <div>
-          <div class="info-tile-label" style="margin-bottom:8px; font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--muted)">Data di scadenza</div>
+          <div class="info-tile-label" style="margin-bottom:8px;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Data di scadenza</div>
           <input style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none" type="date" value="2026-04-10">
         </div>
         <div>
@@ -526,6 +529,7 @@
   </div>
 
 </div>
+
 <script src="script.js"></script>
 </body>
 </html>
