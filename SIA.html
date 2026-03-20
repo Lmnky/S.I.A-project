@@ -194,9 +194,10 @@
       <p style="color:var(--muted);font-size:13px;margin-bottom:32px">Analisi in corso…</p>
       <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--accent2);margin-bottom:8px">EAN-13 rilevato:</div>
       <div style="font-family:'Space Mono',monospace;font-size:18px;letter-spacing:2px;color:var(--text)">8 00150 50055 9</div>
-      <button class="btn-primary" style="margin-top:40px;width:80%" onclick="goTo('screen-scan-result')">
+      <button class="btn-primary" style="margin-top:40px;width:80%" onclick="goTo('screen-scan-result'); fetchAndFillProduct()">
         Vedi risultato →
       </button>
+      
     </div>
   </div>
 
@@ -215,9 +216,9 @@
       <div class="scan-result-card">
         <div class="scan-result-emoji">🍝</div>
         <div class="scan-result-info">
-          <div class="scan-result-name">Pasta Spaghetti n.5</div>
-          <div class="scan-result-brand">Barilla · 500g</div>
-          <div class="scan-result-ean">EAN: 8001505005592</div>
+          <div class="scan-result-name">x</div>
+          <div class="scan-result-brand">x</div>
+          <div class="scan-result-ean">x</div>
         </div>
       </div>
 
@@ -502,6 +503,7 @@
   </div>
 
 </div>
+<input id="field-name">
 <script src="script.js"></script>
 </body>
 </html>

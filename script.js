@@ -1,3 +1,4 @@
+
 function goTo(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const target = document.getElementById(id);
@@ -91,4 +92,21 @@ function goTo(id) {
   function removeTyping() {
     const t = document.getElementById('typing-indicator');
     if (t) t.remove();
+  }
+  async function fetchAndFillProduct() {
+    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${3017624010701}.json`);
+    const data = await res.json();
+  
+    if (data.status !== 1) return; 
+  
+    const p = data.product;
+  
+    const nameEl = document.querySelector('.scan-result-name');
+    const brandEl = document.querySelector('.scan-result-brand');
+    const eanEl = document.querySelector('.scan-result-ean');
+
+    if (nameEl) nameEl.textContent = p.product_name_it || p.product_name || '';
+    if (brandEl) brandEl.textContent = p.brands || '';
+    if (eanEl) eanEl.textContent = `EAN: ${p.code || barcode}`;
+    console.log(p.product_name);
   }
