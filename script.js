@@ -3,6 +3,13 @@ function goTo(id) {
     const target = document.getElementById(id);
     if (target) target.classList.add('active');
     window.scrollTo(0,0);
+    
+    /*Quando si è in scanning la camera si attiva/disattiva*/
+    if (id === 'screen-scan-loading') {
+      startCamera();
+    } else {
+      stopCamera();
+    }
   }
   
   function openSheet() {
@@ -92,3 +99,28 @@ function goTo(id) {
     const t = document.getElementById('typing-indicator');
     if (t) t.remove();
   }
+  let cameraStream = null;
+/*Camera logic*/
+async function startCamera() {
+  const video = document.getElementById('scan-video');
+  if (!video) return;
+
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' } // rear camera on mobile
+    });
+    video.srcObject = cameraStream;
+  } catch (err) {
+    console.error('Camera error:', err);
+    // Fallback: show the original animation if camera is denied
+    document.getElementById('scan-anim-fallback').style.display = 'block';
+    document.getElementById('scan-video').style.display = 'none';
+  }
+}
+
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
+}
